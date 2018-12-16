@@ -69,7 +69,7 @@ TARGETS+= qe$(EXE) kmaps ligatures
 OBJS:= qe.o util.o cutils.o charset.o buffer.o search.o parser.o input.o display.o hex.o \
        list.o
 TOBJS:= $(OBJS)
-OBJS+= extras.o variables.o fractal.o
+OBJS+= extras.o variables.o
 
 ifdef CONFIG_DARWIN
   LDFLAGS += -L/opt/local/lib/
@@ -149,15 +149,7 @@ ifdef CONFIG_HTML
   endif
 endif
 
-ifdef CONFIG_FFMPEG
-  OBJS+= video.o image.o
-  DEP_LIBS+= $(FFMPEG_LIBDIR)/libavcodec/libavcodec.a $(FFMPEG_LIBDIR)/libavformat/libavformat.a
-  LIBS+= -L$(FFMPEG_LIBDIR)/libavcodec -L$(FFMPEG_LIBDIR)/libavformat -lavformat -lavcodec -lz -lpthread
-  DEFINES+= -I$(FFMPEG_SRCDIR)/libavcodec -I$(FFMPEG_SRCDIR)/libavformat
-  TARGETS+= ffplay$(EXE)
-else
-  OBJS+= stb.o
-endif
+OBJS+= stb.o
 
 ifdef CONFIG_X11
   XCFLAGS:= -DCONFIG_X11 $(CFLAGS)
@@ -173,7 +165,7 @@ ifdef CONFIG_X11
   ifdef CONFIG_XSHM
     XLIBS += -lXext
   endif
-  XLIBS += -lX11 $(DLLIBS)
+  XLIBS += -lX11 $(DLLIBS) $(EXTRALIBS)
   XLDFLAGS := $(LDFLAGS)
   ifdef CONFIG_DARWIN
     XLDFLAGS += -L/opt/X11/lib/
@@ -238,7 +230,7 @@ qe$(EXE): qe_g$(EXE) Makefile
 # X11 version of QEmacs
 #
 xqe_g$(EXE): $(XOBJS) $(DEP_LIBS)
-	$(echo) LD $@
+	$(echo) LD $@ $(XLIBS)
 	$(cmd)  $(CC) $(XLDFLAGS) -o $@ $^ $(XLIBS)
 
 xqe$(EXE): xqe_g$(EXE) Makefile
@@ -563,9 +555,9 @@ FILES:= .cvsignore COPYING Changelog Makefile README TODO.org VERSION \
         qe-doc.texi qe.1 qe.c qe.h qe.tcc qeconfig.h qeend.c qemacs.spec \
         qestyles.h qfribidi.c qfribidi.h rlang.c rust.c script.c search.c \
         shell.c swift.c tty.c unicode_join.c unifont.lig unihex.c unix.c \
-        util.c variables.c variables.h video.c win32.c x11.c xml.c
+        util.c variables.c variables.h win32.c x11.c xml.c
 
-FILES+= ats.c cflags.mk elm.c fractal.c jai.c nim.c qemacs.rdef quirrel.c \
+FILES+= ats.c cflags.mk elm.c jai.c nim.c qemacs.rdef quirrel.c \
         rebol.c stb.c stb_image.h tqe.c txl.c unicode_width.h virgil.c
 
 FILES+=plugins/Makefile  plugins/my_plugin.c
