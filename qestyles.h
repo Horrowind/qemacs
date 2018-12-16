@@ -1,7 +1,7 @@
     /* root style, must be complete */
     STYLE_DEF(QE_STYLE_DEFAULT, "default",
               QERGB(0xf8, 0xd8, 0xb0), QERGB(0x00, 0x00, 0x00),
-              QE_FONT_FAMILY_FIXED, 12)
+              QE_FONT_FAMILY_FIXED, 14)
 
     /* system styles */
     STYLE_DEF(QE_STYLE_MODE_LINE, "mode-line",
