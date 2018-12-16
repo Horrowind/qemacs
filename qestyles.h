@@ -72,10 +72,10 @@
               0, 0)
 
     /* popup / region styles */
-    STYLE_DEF(QE_STYLE_REGION_HILITE, "region-hilite",
+    STYLE_DEF(QE_STYLE_REGION_HIGHLIGHT, "region-highlight",
               QERGB(0x00, 0x00, 0x00), QERGB(0x80, 0xf0, 0xf0),
               0, 0)
-    STYLE_DEF(QE_STYLE_SEARCH_HILITE, "search-hilite",
+    STYLE_DEF(QE_STYLE_SEARCH_HIGHLIGHT, "search-highlight",
               QERGB(0x00, 0x00, 0x00), QERGB(0x00, 0x80, 0x80),
               0, 0)
     STYLE_DEF(QE_STYLE_SEARCH_MATCH, "search-match",

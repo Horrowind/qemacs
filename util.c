@@ -2326,7 +2326,7 @@ bstr_t bstr_token(const char *s, int sep, const char **pp) {
 
     if (s) {
         /* XXX: should special case spaces? */
-        for (; s != '\0' && *s != sep; s++)
+        for (; *s != '\0' && *s != sep; s++)
             continue;
 
         bs.len = s - bs.s;

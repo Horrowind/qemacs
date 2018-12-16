@@ -1030,7 +1030,7 @@ int eb_create_style_buffer(EditBuffer *b, int flags)
         return 0;
     } else {
         char name[MAX_BUFFERNAME_SIZE];
-        snprintf(name, sizeof(name), "*S<%s>", b->name);
+        snprintf(name, sizeof(name), "*S<%.251s>", b->name);
         b->b_styles = eb_new(name, BF_SYSTEM | BF_IS_STYLE | BF_RAW);
         b->flags |= flags & BF_STYLES;
         b->style_shift = ((unsigned)(flags & BF_STYLES) / BF_STYLE1) - 1;
@@ -1146,7 +1146,7 @@ static void eb_addlog(EditBuffer *b, enum LogOperation op,
          * should not be a problem since this log buffer is never
          * referenced by name.
          */
-        snprintf(buf, sizeof(buf), "*L<%s>", b->name);
+        snprintf(buf, sizeof(buf), "*L<%.251s>", b->name);
         b->log_buffer = eb_new(buf, BF_SYSTEM | BF_IS_LOG | BF_RAW);
         if (!b->log_buffer)
             return;
@@ -1231,7 +1231,7 @@ void do_undo(EditState *s)
         return;
     }
 
-    /* deactivate region hilite */
+    /* deactivate region highlight */
     s->region_style = 0;
 
     /* Should actually keep undo state current until new logs are added */
@@ -1308,7 +1308,7 @@ void do_redo(EditState *s)
         return;
     }
 
-    /* deactivate region hilite */
+    /* deactivate region highlight */
     s->region_style = 0;
 
     /* Should actually keep undo state current until new logs are added */

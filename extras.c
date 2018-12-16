@@ -220,7 +220,7 @@ void do_compare_files(EditState *s, const char *filename, int bflags)
     get_default_path(s->b, s->offset, dir, sizeof(dir));
 
     if (strstart(filename, dir, &tail)) {
-        snprintf(buf, sizeof(buf), "%s../%s", dir, tail);
+        snprintf(buf, sizeof(buf), "%.255s../%.255s", dir, tail);
     } else
     if (pathlen == 0) {
         snprintf(buf, sizeof(buf), "../%s", filename);
@@ -384,7 +384,7 @@ static void eb_tabify(EditBuffer *b, int p1, int p2)
 
 static void do_tabify_buffer(EditState *s)
 {
-    /* deactivate region hilite */
+    /* deactivate region highlight */
     s->region_style = 0;
 
     eb_tabify(s->b, 0, s->b->total_size);
@@ -392,7 +392,7 @@ static void do_tabify_buffer(EditState *s)
 
 static void do_tabify_region(EditState *s)
 {
-    /* deactivate region hilite */
+    /* deactivate region highlight */
     s->region_style = 0;
 
     eb_tabify(s->b, s->b->mark, s->offset);
@@ -440,7 +440,7 @@ static void eb_untabify(EditBuffer *b, int p1, int p2)
 
 static void do_untabify_buffer(EditState *s)
 {
-    /* deactivate region hilite */
+    /* deactivate region highlight */
     s->region_style = 0;
 
     eb_untabify(s->b, 0, s->b->total_size);
@@ -448,7 +448,7 @@ static void do_untabify_buffer(EditState *s)
 
 static void do_untabify_region(EditState *s)
 {
-    /* deactivate region hilite */
+    /* deactivate region highlight */
     s->region_style = 0;
 
     eb_untabify(s->b, s->b->mark, s->offset);
@@ -458,7 +458,7 @@ static void do_indent_region(EditState *s)
 {
     int col_num, line1, line2;
 
-    /* deactivate region hilite */
+    /* deactivate region highlight */
     s->region_style = 0;
 
     /* Swap point and mark so mark <= point */
@@ -1153,7 +1153,7 @@ static void do_set_region_color(EditState *s, const char *str)
     int offset, size;
     QETermStyle style;
 
-    /* deactivate region hilite */
+    /* deactivate region highlight */
     s->region_style = 0;
 
     if (qe_term_get_style(str, &style)) {
@@ -1180,7 +1180,7 @@ static void do_set_region_style(EditState *s, const char *str)
     QETermStyle style;
     QEStyleDef *st;
 
-    /* deactivate region hilite */
+    /* deactivate region highlight */
     s->region_style = 0;
 
     st = find_style(str);

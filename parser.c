@@ -383,7 +383,7 @@ static int do_eval_buffer_region(EditState *s, int start, int stop)
 
 void do_eval_region(EditState *s)
 {
-    /* deactivate region hilite */
+    /* deactivate region highlight */
     s->region_style = 0;
 
     do_eval_buffer_region(s, s->b->mark, s->offset);

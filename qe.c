@@ -666,9 +666,9 @@ void do_mark_region(EditState *s, int mark, int offset)
     /* CG: Should have local and global mark rings */
     s->b->mark = clamp(mark, 0, s->b->total_size);
     s->offset = clamp(offset, 0, s->b->total_size);
-    /* activate region hilite */
-    if (s->qe_state->hilite_region)
-        s->region_style = QE_STYLE_REGION_HILITE;
+    /* activate region highlight */
+    if (s->qe_state->highlight_region)
+        s->region_style = QE_STYLE_REGION_HIGHLIGHT;
 }
 
 /* paragraph handling */
@@ -896,7 +896,7 @@ void do_changecase_region(EditState *s, int arg)
 {
     int offset;
 
-    /* deactivate region hilite */
+    /* deactivate region highlight */
     s->region_style = 0;
 
     /* WARNING: during case change, the region offsets can change, so
@@ -1547,7 +1547,7 @@ int do_delete_selection(EditState *s)
         // XXX: make it optional?
         res = eb_delete_range(s->b, s->b->mark, s->offset);
     }
-    /* deactivate region hilite */
+    /* deactivate region highlight */
     s->region_style = 0;
 
     return res;
@@ -1616,7 +1616,7 @@ void text_write_char(EditState *s, int key)
 
     /* XXX: Should delete hilighted region */
 
-    /* deactivate region hilite */
+    /* deactivate region highlight */
     s->region_style = 0;
 
     cur_ch = eb_nextc(s->b, s->offset, &offset1);
@@ -1819,9 +1819,9 @@ void do_break(EditState *s)
         return;
     }
 #endif
-    /* deactivate region hilite */
+    /* deactivate region highlight */
     s->region_style = 0;
-    /* deactivate search hilite */
+    /* deactivate search highlight */
     s->isearch_state = NULL;
 
     /* well, currently nothing needs to be aborted in global context */
@@ -1877,7 +1877,7 @@ void do_kill(EditState *s, int p1, int p2, int dir, int keep)
     int len, tmp;
     EditBuffer *b;
 
-    /* deactivate region hilite */
+    /* deactivate region highlight */
     s->region_style = 0;
 
     if (p1 > p2) {
@@ -5666,7 +5666,7 @@ void switch_to_buffer(EditState *s, EditBuffer *b)
     EditState *e;
     ModeDef *mode;
 
-    /* remove region hilite */
+    /* remove region highlight */
     s->region_style = 0;
 
     if (b == b0)
@@ -7349,7 +7349,7 @@ void do_write_region(EditState *s, const char *filename)
 {
     char absname[MAX_FILENAME_SIZE];
 
-    /* deactivate region hilite */
+    /* deactivate region highlight */
     s->region_style = 0;
 
     canonicalize_absolute_path(s, absname, sizeof(absname), filename);
@@ -8921,7 +8921,7 @@ static void qe_init(void *opaque)
     qs->argc = argc;
     qs->argv = argv;
 
-    qs->hilite_region = 1;
+    qs->highlight_region = 1;
     qs->default_tab_width = 8;
     qs->default_fill_column = 70;
     qs->mmap_threshold = MIN_MMAP_SIZE;

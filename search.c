@@ -595,7 +595,7 @@ void isearch_colorize_matches(EditState *s, unsigned int *buf, int len,
                     stop = len;
             }
             for (i = start; i < stop; i++) {
-                sbuf[i] = QE_STYLE_SEARCH_HILITE;
+                sbuf[i] = QE_STYLE_SEARCH_HIGHLIGHT;
             }
         }
         offset = found_end;
