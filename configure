@@ -71,7 +71,6 @@ xv="no"
 xshm="no"
 xrender="no"
 png="no"
-ffmpeg="no"
 html="no"
 doc="yes"
 plugins="yes"
@@ -162,11 +161,6 @@ if test -z "$source_path" -o "$source_path" = "." ; then
     source_path_used="no"
 fi
 
-if test -d "./ffmpeg" ; then
-    ffmpeg="yes"
-    ffmpeg_srcdir="./ffmpeg"
-fi
-
 if test -f "/usr/include/png.h" ; then
     png="yes"
 fi
@@ -214,8 +208,6 @@ echo "  --enable-tiny            build a very small version"
 echo "  --disable-html           disable graphical html support"
 echo "  --disable-png            disable png support"
 echo "  --disable-plugins        disable plugins support"
-echo "  --disable-ffmpeg         disable ffmpeg support"
-echo "  --with-ffmpegdir=DIR     find ffmpeg sources and libraries in DIR"
 echo "                           for audio/video/image support"
 echo ""
 echo "Advanced options (experts only):"
@@ -223,7 +215,6 @@ echo "  --source-path=PATH       path of source code [$source_path]"
 echo "  --cross-prefix=PREFIX    use PREFIX for compile tools [$cross_prefix]"
 echo "  --cc=CC                  use C compiler CC [$cc]"
 echo "  --make=MAKE              use specified make [$make]"
-echo "  --with-ffmpeglibdir=DIR  set ffmpeg object files directory"
 echo ""
 echo "NOTE: The object files are built at the place where configure is launched"
 exit 1
@@ -264,12 +255,6 @@ for opt do
         ;;
       --cpu=*)
         cpu=`echo $opt | cut -d '=' -f 2`
-        ;;
-      --with-ffmpegdir=*)
-        ffmpeg_srcdir=${opt#--with-ffmpegdir=} ; ffmpeg="yes"
-        ;;
-      --with-ffmpeglibdir=*)
-        ffmpeg_libdir=${opt#--with-ffmpeglibdir=}
         ;;
       --disable-*)
         value="no"
@@ -327,9 +312,6 @@ for opt do
         ;;
       --enable-plugins | --disable-plugins)
         plugins="$value"
-        ;;
-      --enable-ffmpeg | --disable-ffmpeg)
-        ffmpeg="$value"
         ;;
       --enable-* | --disable-*)
         echo "unknown option: $opt"
@@ -396,7 +378,6 @@ if test "$cygwin" = "yes" ; then
     doc="no"
     x11="no"
     png="no"
-    ffmpeg="no"
     html="no"
     plugins="no"
     initcalls="no"
@@ -411,7 +392,6 @@ fi
 
 if test "$x11" = "no" -a "$haiku" = "no" ; then
     png="no"
-    ffmpeg="no"
     html="no"
 fi
 
@@ -450,14 +430,7 @@ EOF
     $cc -o $TMPO $TMPC 2> /dev/null || _memalign=no
 fi
 
-if test "$ffmpeg" = "yes" ; then
-    if test -z "$ffmpeg_libdir" ; then
-        ffmpeg_libdir="$ffmpeg_srcdir"
-    fi
-fi
-
 if test "$tiny" = "yes" ; then
-    ffmpeg="no"
     x11="no"
     xv="no"
     xshm="no"
@@ -524,7 +497,6 @@ echo "Xvideo support      $xv"
 echo "XShm support        $xshm"
 #echo "Xrender support     $xrender"
 echo "libpng support      $png"
-echo "FFMPEG support      $ffmpeg"
 echo "Graphical HTML      $html"
 echo "Memory mapped files $mmap"
 echo "Unlocked I/O        $unlockio"
@@ -680,13 +652,6 @@ fi
 if test "$png" = "yes" ; then
   echo "#define CONFIG_PNG_OUTPUT 1" >> $TMPH
   echo "CONFIG_PNG_OUTPUT=yes" >> $TMPMAK
-fi
-
-if test "$ffmpeg" = "yes" ; then
-  echo "#define CONFIG_FFMPEG 1" >> $TMPH
-  echo "CONFIG_FFMPEG=yes" >> $TMPMAK
-  echo "FFMPEG_SRCDIR=$ffmpeg_srcdir" >> $TMPMAK
-  echo "FFMPEG_LIBDIR=$ffmpeg_libdir" >> $TMPMAK
 fi
 
 if test "$kmaps" = "yes" ; then
