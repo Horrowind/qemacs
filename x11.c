@@ -1508,7 +1508,7 @@ static void x11_handle_event(void *opaque)
                     key = KEY_CTRL_END;
                     goto got_key;
                 case XK_BackSpace:
-                    key = KEY_CTRL(127);
+                    key = KEY_META(KEY_DEL);
                     goto got_key;
                 default:
                     if (len > 0) {
