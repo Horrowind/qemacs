@@ -4850,15 +4850,16 @@ static void parse_args(ExecCmdState *es)
             es->default_input[0] = '\0';
             if (strequal(completion_name, "file")) {
                 get_default_path(s->b, s->offset, def_input, sizeof(def_input));
-            } else
-            if (strequal(completion_name, "buffer")) {
+            } else if (strequal(completion_name, "buffer")) {
                 EditBuffer *b;
                 if (d->action.ESs == do_switch_to_buffer)
                     b = predict_switch_to_buffer(s);
                 else
                     b = s->b;
                 pstrcpy(es->default_input, sizeof(es->default_input), b->name);
-            }
+            } else if(!strcmp(completion_name, "compile")) {
+                pstrcpy(def_input, sizeof(es->default_input), "make");
+            } 
             if (es->default_input[0] != '\0') {
                 pstrcat(prompt, sizeof(prompt), "(default ");
                 pstrcat(prompt, sizeof(prompt), es->default_input);

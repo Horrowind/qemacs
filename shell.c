@@ -3111,7 +3111,7 @@ static CmdDef shell_global_commands[] = {
           "s{Open connection to (host or user@host: }|ssh|")
     CMD2( KEY_CTRLX(KEY_CTRL('e')), KEY_NONE,
           "compile", do_compile, ESs,
-          "s{Compile command: }|compile|")
+          "s{Compile command: }[compile]|compile|")
     CMD2( KEY_CTRLX('m'), KEY_NONE,
           "make", do_compile, ESs,
           "S{make}")
