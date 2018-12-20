@@ -868,7 +868,7 @@ enum QEEventType {
 #define KEY_RET         KEY_CTRL('m')
 #define KEY_ESC         KEY_CTRL('[')
 #define KEY_SPC         0x0020
-#define KEY_DEL         127             // kbs
+#define KEY_BACKSPACE   127             // kbs
 #define KEY_BS          KEY_CTRL('h')   // kbs
 
 #define KEY_UP          KEY_ESC1('A')   // kcuu1

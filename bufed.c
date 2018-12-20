@@ -405,7 +405,7 @@ static CmdDef bufed_commands[] = {
           "bufed-abort", bufed_select, -1)
     CMD1( ' ', KEY_CTRL('t'),
           "bufed-toggle-selection", list_toggle_selection, 1)
-    CMD1( KEY_DEL, KEY_NONE,
+    CMD1( KEY_BACKSPACE, KEY_NONE,
           "bufed-unmark-backward", list_toggle_selection, -1)
     //CMD1( 'u', KEY_NONE, "bufed-unmark", bufed_mark, ' ')
     CMD0( '~', KEY_NONE,

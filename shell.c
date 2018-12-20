@@ -2033,6 +2033,21 @@ static void shell_pid_cb(void *opaque, int status)
             if (s->shell_flags & SF_AUTO_MODE)
                 qe_set_next_mode(e, 0, 0);
         }
+        if(status == 0 && e->b == eb_find("*compilation*")) {
+            /* XXX: e should not become invalid */
+            b->modified = 0;
+
+            /* find a new buffer to switch to */
+            EditBuffer* b1;
+            for (b1 = qs->first_buffer; b1 != NULL; b1 = b1->next) {
+                if (b1 != b && !(b1->flags & BF_SYSTEM))
+                    break;
+            }
+            if (!b1) {
+                b1 = eb_new("*scratch*", BF_SAVELOG | BF_UTF8);
+            }
+            switch_to_buffer(e, b1);
+        }
     }
     if (!(s->shell_flags & SF_INTERACTIVE)) {
         /* Must Unlink the shell data to avoid potential crash */
@@ -2515,7 +2530,7 @@ static void do_shell_delete_char(EditState *e)
 static void do_shell_backspace(EditState *e)
 {
     if (e->interactive) {
-        shell_write_char(e, KEY_DEL);
+        shell_write_char(e, KEY_BACKSPACE);
     } else {
         do_backspace(e, NO_ARG);
     }
@@ -2535,7 +2550,7 @@ static void do_shell_kill_word(EditState *e, int dir)
         }
         do_kill(e, start, e->offset, dir, 1);
         // XXX: word pattern consistency issue
-        shell_write_char(e, dir > 0 ? KEY_META('d') : KEY_META(KEY_DEL));
+        shell_write_char(e, dir > 0 ? KEY_META('d') : KEY_META(KEY_BACKSPACE));
     } else {
         do_kill_word(e, dir);
     }
@@ -3060,7 +3075,7 @@ static CmdDef shell_commands[] = {
     CMD2( '\r', KEY_NONE,
           "shell-enter", do_shell_enter, ES, "*")
     /* CG: should send s->kbs */
-    CMD2( KEY_DEL, KEY_NONE,
+    CMD2( KEY_BACKSPACE, KEY_NONE,
           "shell-backward-delete-char", do_shell_backspace, ES, "*")
     CMD0( KEY_CTRLC(KEY_CTRL('c')), KEY_NONE,   /* C-c C-c */
           "shell-intr", do_shell_intr)
@@ -3068,7 +3083,7 @@ static CmdDef shell_commands[] = {
           "shell-delete-char", do_shell_delete_char, ES, "*")
     CMD3( KEY_META('d'), KEY_NONE,
           "shell-kill-word", do_shell_kill_word, ESi, 1, "v")
-    CMD3( KEY_META(KEY_DEL), KEY_META(KEY_BS) ,
+    CMD3( KEY_META(KEY_BACKSPACE), KEY_META(KEY_BS) ,
           "shell-backward-kill-word", do_shell_kill_word, ESi, -1, "v")
     CMD1( KEY_META('p'), KEY_NONE,
           "shell-previous", shell_previous_next, -1)

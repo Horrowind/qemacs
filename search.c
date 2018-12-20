@@ -369,7 +369,7 @@ static void isearch_key(void *opaque, int ch)
     }
     /* XXX: all these should be isearch-mode bindings */
     switch (ch) {
-    case KEY_DEL:
+    case KEY_BACKSPACE:
     case KEY_BS:
         /* cancel last input item from search string */
         if (is->pos > 0)

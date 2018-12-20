@@ -115,9 +115,9 @@ static CmdDef basic_commands[] = {
           "kill-line", do_kill_line, ESi, "ui" )
     CMD2( KEY_NONE, KEY_NONE,
           "kill-beginning-of-line", do_kill_beginning_of_line, ESi, "ui" )
-    CMD3( KEY_META(KEY_DEL), KEY_NONE,
+    CMD3( KEY_META(KEY_BACKSPACE), KEY_NONE,
           "backward-kill-word", do_kill_word, ESi, -1, "v" )
-    CMD3( KEY_CTRL(KEY_DEL), KEY_NONE,
+    CMD3( KEY_CTRL(KEY_BACKSPACE), KEY_NONE,
           "forward-kill-word", do_kill_word, ESi, 1, "v" )
     CMD1( KEY_CTRL('w'), KEY_NONE,
           "kill-region", do_kill_region, 0 )

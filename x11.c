@@ -1460,7 +1460,7 @@ static void x11_handle_event(void *opaque)
             if (meta) {
                 switch (keysym) {
                 case XK_BackSpace:
-                    key = KEY_META(KEY_DEL);
+                    key = KEY_CTRL(KEY_BACKSPACE);
                     goto got_key;
                 default:
                     if (len > 0) {
@@ -1508,7 +1508,7 @@ static void x11_handle_event(void *opaque)
                     key = KEY_CTRL_END;
                     goto got_key;
                 case XK_BackSpace:
-                    key = KEY_META(KEY_DEL);
+                    key = KEY_META(KEY_BACKSPACE);
                     goto got_key;
                 default:
                     if (len > 0) {
@@ -1542,7 +1542,7 @@ static void x11_handle_event(void *opaque)
                 case XK_Down:   key = KEY_DOWN;   goto got_key;
                 case XK_Right:  key = KEY_RIGHT;  goto got_key;
                 case XK_Left:   key = KEY_LEFT;   goto got_key;
-                case XK_BackSpace: key = KEY_DEL; goto got_key;
+                case XK_BackSpace: key = KEY_BACKSPACE; goto got_key;
                 case XK_Insert: key = KEY_INSERT; goto got_key;
                 case XK_Delete: key = KEY_DELETE; goto got_key;
                 case XK_Home:   key = KEY_HOME;   goto got_key;

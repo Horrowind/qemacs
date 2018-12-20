@@ -1024,8 +1024,8 @@ int css_get_enum(const char *str, const char *enum_str)
 }
 
 static unsigned short const keycodes[] = {
-    KEY_SPC, KEY_DEL, KEY_RET, KEY_ESC, KEY_TAB, KEY_SHIFT_TAB,
-    KEY_CTRL(' '), KEY_DEL, KEY_CTRL('\\'),
+    KEY_SPC, KEY_BACKSPACE, KEY_RET, KEY_ESC, KEY_TAB, KEY_SHIFT_TAB,
+    KEY_CTRL(' '), KEY_CTRL('?'), KEY_CTRL('\\'),
     KEY_CTRL(']'), KEY_CTRL('^'), KEY_CTRL('_'), KEY_CTRL('_'),
     KEY_LEFT, KEY_RIGHT, KEY_UP, KEY_DOWN,
     KEY_HOME, KEY_END, KEY_PAGEUP, KEY_PAGEDOWN,

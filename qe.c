@@ -414,9 +414,9 @@ void do_toggle_control_h(EditState *s, int set)
             for (i = 0; i < kd->nb_keys; i++) {
                 switch (kd->keys[i]) {
                 case KEY_CTRL('h'):
-                    kd->keys[i] = set ? KEY_META('h') : KEY_DEL;
+                    kd->keys[i] = set ? KEY_META('h') : KEY_BACKSPACE;
                     break;
-                case KEY_DEL:
+                case KEY_BACKSPACE:
                     if (set)
                         kd->keys[i] = KEY_CTRL('h');
                     break;

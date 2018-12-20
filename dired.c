@@ -1312,7 +1312,7 @@ static CmdDef dired_commands[] = {
     /* XXX: merge with other dired-next-line */
     CMD1( ' ', KEY_DOWN,
           "dired-next-line", dired_up_down, 1)
-    CMD1( KEY_DEL, KEY_NONE,
+    CMD1( KEY_BACKSPACE, KEY_NONE,
           "dired-unmark-backward", dired_mark, -1)
     CMD2( 's', KEY_NONE,
           "dired-sort", dired_sort, ESs,
