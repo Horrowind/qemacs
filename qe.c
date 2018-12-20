@@ -5124,6 +5124,32 @@ void do_end_macro(EditState *s)
     put_status(s, "Keyboard macro defined");
 }
 
+void do_end_or_call_macro(EditState *s)
+{
+    QEmacsState *qs = s->qe_state;
+    int key;
+    /* if called inside a macro, it is last recorded keys, so ignore
+       it */
+    if (qs->macro_key_index != -1)
+        return;
+
+    if (!qs->defining_macro) {
+	    if (qs->nb_macro_keys > 0) {
+	        /* CG: should share code with do_execute_macro */
+    	    for (qs->macro_key_index = 0;
+        	     qs->macro_key_index < qs->nb_macro_keys;
+            	 qs->macro_key_index++) {
+            	key = qs->macro_keys[qs->macro_key_index];
+            	qe_key_process(key);
+        	}
+        	qs->macro_key_index = -1;
+    	}
+    } else {
+	    qs->defining_macro = 0;
+    	put_status(s, "Keyboard macro defined");
+	}
+}
+
 void do_call_macro(EditState *s)
 {
     QEmacsState *qs = s->qe_state;

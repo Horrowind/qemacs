@@ -2236,6 +2236,7 @@ void do_execute_command(EditState *s, const char *cmd, int argval);
 void window_display(EditState *s);
 void do_numeric_argument(EditState *s);
 void do_start_macro(EditState *s);
+void do_end_or_call_macro(EditState *s);
 void do_end_macro(EditState *s);
 void do_call_macro(EditState *s);
 void do_execute_macro_keys(EditState *s, const char *keys);

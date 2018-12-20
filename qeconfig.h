@@ -216,6 +216,10 @@ static CmdDef basic_commands[] = {
           "end-kbd-macro", do_end_macro)
     CMD0( KEY_CTRLX('e'), KEY_CTRL('\\'),
           "call-last-kbd-macro", do_call_macro)
+    CMD0( KEY_F3, KEY_NONE,
+          "start-kbd-macro", do_end_macro)
+    CMD0( KEY_F4, KEY_NONE,
+          "end-or-call-kbd-macro", do_end_or_call_macro)
     CMD2( KEY_NONE, KEY_NONE,
           "define-kbd-macro", do_define_kbd_macro, ESsss,
           "s{Macro name: }[command]"

@@ -1042,7 +1042,19 @@ static void do_c_indent(EditState *s)
     }
 }
 
-static void do_c_electric(EditState *s, int key)
+static void do_c_electric(EditState *s)
+{
+    int offset = s->offset;
+    int was_preview = s->b->flags & BF_PREVIEW;
+
+    if (was_preview)
+        return;
+    /* reindent line at original point */
+    if (s->mode->auto_indent && s->mode->indent_func)
+        (s->mode->indent_func)(s, eb_goto_bol(s->b, offset));
+}
+
+static void do_c_electric_key(EditState *s, int key)
 {
     int offset = s->offset;
     int was_preview = s->b->flags & BF_PREVIEW;
@@ -1212,9 +1224,11 @@ static CmdDef c_commands[] = {
     CMD2( KEY_META('i'), KEY_NONE,
           "c-list-conditionals", do_c_list_conditionals, ES, "")
     CMD2( '{', '}',
-          "c-electric-key", do_c_electric, ESi, "*ki")
+          "c-electric-key", do_c_electric_key, ESi, "*ki")
     CMD2( KEY_RET, KEY_NONE,
           "c-newline", do_c_return, ES, "*v")
+	CMD2( KEY_TAB, KEY_NONE,
+          "c-electric", do_c_electric, ES, "*v")
     CMD_DEF_END,
 };
 
