@@ -8948,7 +8948,7 @@ static void qe_init(void *opaque)
     qs->argv = argv;
 
     qs->highlight_region = 1;
-    qs->default_tab_width = 8;
+    qs->default_tab_width = 4;
     qs->default_fill_column = 70;
     qs->mmap_threshold = MIN_MMAP_SIZE;
     qs->max_load_size = MAX_LOAD_SIZE;
@@ -9104,7 +9104,7 @@ static void qe_init(void *opaque)
 #if !defined(CONFIG_TINY) && !defined(CONFIG_WIN32)
     if (is_player && !session_loaded && (_optind >= argc || S_ISDIR(s->b->st_mode))) {
         /* if player, go to directory mode by default if no file selected */
-        do_dired(s, NO_ARG);
+        //do_dired(s, NO_ARG);
         s = qs->active_window;
     }
 #endif
