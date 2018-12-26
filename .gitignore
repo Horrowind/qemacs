@@ -6,3 +6,12 @@ tqe_g
 xqe
 xqe_g
 
+.filelist
+.objs
+STATS
+config.mak
+fbftoqe
+html2png
+libqhtml
+plugin-example
+plugins
