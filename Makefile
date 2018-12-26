@@ -502,7 +502,7 @@ distclean: clean
 
 install: $(TARGETS) qe.1
 	$(INSTALL) -m 755 -d $(DESTDIR)$(prefix)/bin
-	$(INSTALL) -m 755 -d $(DESTDIR)$(mandir)/man1
+	#$(INSTALL) -m 755 -d $(DESTDIR)$(mandir)/man1
 	$(INSTALL) -m 755 -d $(DESTDIR)$(datadir)/qe
 ifdef CONFIG_X11
 	$(INSTALL) -m 755 -s xqe$(EXE) $(DESTDIR)$(prefix)/bin/qemacs$(EXE)
@@ -513,7 +513,7 @@ else
 	$(INSTALL) -m 755 -s qe$(EXE) $(DESTDIR)$(prefix)/bin/qemacs$(EXE)
   endif
 endif
-	ln -sf qemacs$(EXE) $(DESTDIR)$(prefix)/bin/qe$(EXE)
+	#ln -sf qemacs$(EXE) $(DESTDIR)$(prefix)/bin/qe$(EXE)
 ifdef CONFIG_FFMPEG
 	ln -sf qemacs$(EXE) $(DESTDIR)$(prefix)/bin/ffplay$(EXE)
 endif
