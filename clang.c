@@ -1270,6 +1270,7 @@ ModeDef c_mode = {
     .types = c_types,
     .indent_func = c_indent_line,
     .auto_indent = 1,
+    .default_wrap = WRAP_TRUNCATE,
 };
 
 /* XXX: support Yacc / Bison syntax extensions */
