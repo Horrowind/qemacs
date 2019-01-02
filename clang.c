@@ -1350,6 +1350,7 @@ ModeDef cpp_mode = {
     .indent_func = c_indent_line,
     .auto_indent = 1,
     .fallback = &c_mode,
+    .default_wrap = WRAP_TRUNCATE,
 };
 
 /*---------------- C2 language ----------------*/
