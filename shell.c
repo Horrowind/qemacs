@@ -2829,8 +2829,9 @@ static void do_compile(EditState *s, const char *cmd)
     if (s->flags & (WF_POPUP | WF_MINIBUF))
         return;
 
-    get_default_path(s->b, s->offset, curpath, sizeof curpath);
-
+    //get_default_path(s->b, s->offset, curpath, sizeof curpath);
+    getcwd(curpath, sizeof(curpath));
+    
     if (s->flags & WF_POPLEFT) {
         /* avoid messing with the dired pane */
         s = find_window(s, KEY_RIGHT, s);
