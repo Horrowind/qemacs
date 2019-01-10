@@ -745,7 +745,7 @@ static int check_indent(EditState *s, int offset, int i, int *offset_ptr)
     }
 }
 
-/* Insert n spaces at beginning of line at <offset>.
+/* Insert i spaces at beginning of line at <offset>.
  * Store new offset after indentation to <*offset_ptr>.
  * Tabs are inserted if s->indent_tabs_mode is true.
  */
@@ -806,8 +806,10 @@ static void c_indent_line(EditState *s, int offset0)
             style = sbuf[p - buf];
             /* skip strings or comments */
             if (style == C_STYLE_COMMENT
-            ||  style == C_STYLE_STRING
-            ||  style == C_STYLE_PREPROCESS) {
+            ||  style == C_STYLE_STRING) {
+                continue;
+            }
+            if (style == C_STYLE_PREPROCESS && buf[len - 1] != '\\') {
                 continue;
             }
             if (state == INDENT_FIND_EQ) {
@@ -944,8 +946,10 @@ static void c_indent_line(EditState *s, int offset0)
         /* if preprocess, no indent */
         /* XXX: should indent macro definitions and align continuation marks */
         if (style == C_STYLE_PREPROCESS) {
-            pos = 0;
-            break;
+            if(c == '#') {
+                pos = 0;
+                break;
+            }
         }
         if (style == C_STYLE_COMMENT) {
             if (c == '/') {
@@ -993,42 +997,57 @@ static void c_indent_line(EditState *s, int offset0)
     //     pos += 3;
     // }
 
-    /* the computed indent is in 'pos' */
-    /* if on a blank line, reset indent to 0 unless point is on it */
-    if (eb_is_blank_line(s->b, offset, NULL)
-    &&  !(s->offset >= offset && s->offset <= eb_goto_eol(s->b, offset))) {
-        pos = 0;
-    }
-    /* Do not modify buffer if indentation in correct */
-    if (!check_indent(s, offset, pos, &offset1)) {
-        /* simple approach to normalization of indentation */
-        eb_delete_range(s->b, offset, offset1);
-        insert_indent(s, offset, pos, &offset1);
-    }
+
+    int offset2 = eb_goto_eol(s->b, offset);
+    if(len > 0 && (buf[len-1] == '\\')) {
+        if(len > 81) {
+            int i;
+            for(i = len - 2; i >= 79; i--) {
+                if(buf[i] != ' ') break;
+            }
+            eb_delete_range(s->b, offset + i + 1, offset2 - 1);
+            eb_insert_spaces(s->b, offset + i + 1, 1);
+        } else {
+            eb_insert_spaces(s->b, offset2 - 1, 80 - len + 1);
+        }
+    } else {
+        /* the computed indent is in 'pos' */
+        /* if on a blank line, reset indent to 0 unless point is on it */
+        if (eb_is_blank_line(s->b, offset, NULL)
+        &&  !(s->offset >= offset && s->offset <= offset2)) {
+            pos = 0;
+        }
+        /* Do not modify buffer if indentation in correct */
+        if (!check_indent(s, offset, pos, &offset1)) {
+            /* simple approach to normalization of indentation */
+            eb_delete_range(s->b, offset, offset1);
+            insert_indent(s, offset, pos, &offset1);
+        }
 #if 0
-    if (s->mode->auto_indent > 1) {  /* auto format */
-        /* recompute colorization of the current line (after re-indentation) */
-        len = s->get_colorized_line(s, buf, countof(buf), sbuf,
-                                    offset, &offset1, line_num1);
-        /* skip indentation */
-        for (pos = 0; qe_isblank(buf[pos]); pos++)
-            continue;
-        /* XXX: keywords "if|for|while|switch -> one space before `(` */
-        /* XXX: keyword "return" -> one space before expression */
-        /* XXX: keyword "do" -> one space before '{' */
-        /* XXX: other words -> no space before '(', '[', `++`, `--`, `->`, `.` */
-        /* XXX: other words and sequences -> space before `*`, but not after */
-        /* XXX: unary prefix operators: ! ~ - + & * ++ -- */
-        /* XXX: postfix operators: ++ -- -> . [ */
-        /* XXX: grouping operators: ( ) [ ] */
-        /* XXX: binary operators: = == === != !== < > <= >= && || 
-        ^ & | + - * / % << >> ^= &= |= += -= *= /= %= <<= >>= ? : */
-        /* XXX: sequence operators: , ; */
-    }
+        if (s->mode->auto_indent > 1) {  /* auto format */
+            /* recompute colorization of the current line (after re-indentation) */
+            len = s->get_colorized_line(s, buf, countof(buf), sbuf,
+                                        offset, &offset, line_num);
+            /* skip indentation */
+            for (pos = 0; qe_isblank(buf[pos]); pos++)
+                continue;
+            /* XXX: keywords "if|for|while|switch -> one space before `(` */
+            /* XXX: keyword "return" -> one space before expression */
+            /* XXX: keyword "do" -> one space before '{' */
+            /* XXX: other words -> no space before '(', '[', `++`, `--`, `->`, `.` */
+            /* XXX: other words and sequences -> space before `*`, but not after */
+            /* XXX: unary prefix operators: ! ~ - + & * ++ -- */
+            /* XXX: postfix operators: ++ -- -> . [ */
+            /* XXX: grouping operators: ( ) [ ] */
+            /* XXX: binary operators: = == === != !== < > <= >= && || 
+               ^ & | + - * / % << >> ^= &= |= += -= *= /= %= <<= >>= ? : */
+            /* XXX: sequence operators: , ; */
+        }
 #endif
-    /* move to the indentation if point was in indent space */
-    if (s->offset >= offset && s->offset < offset1) {
-        s->offset = offset1;
+        /* move to the indentation if point was in indent space */
+        if (s->offset >= offset && s->offset < offset1) {
+            s->offset = offset1;
+        }
     }
 }
 
@@ -1051,7 +1070,7 @@ static void do_c_electric(EditState *s)
         return;
     /* reindent line at original point */
     if (s->mode->auto_indent && s->mode->indent_func)
-        (s->mode->indent_func)(s, eb_goto_bol(s->b, offset));
+        (s->mode->indent_func)(s, offset);
 }
 
 static void do_c_electric_key(EditState *s, int key)
@@ -1064,7 +1083,7 @@ static void do_c_electric_key(EditState *s, int key)
         return;
     /* reindent line at original point */
     if (s->mode->auto_indent && s->mode->indent_func)
-        (s->mode->indent_func)(s, eb_goto_bol(s->b, offset));
+        (s->mode->indent_func)(s, offset);
 }
 
 static void do_c_return(EditState *s)
