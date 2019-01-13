@@ -899,6 +899,10 @@ static QEFont *tty_dpy_open_font(qe__unused__ QEditScreen *s,
 
 static void tty_dpy_close_font(qe__unused__ QEditScreen *s, QEFont **fontp)
 {
+#ifdef X11_IN_TTY
+    TTYState *ts = s->priv_data;
+    XCloseDisplay(ts->display);
+#endif
     qe_free(fontp);
 }
 
