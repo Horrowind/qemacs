@@ -31,6 +31,13 @@
 #include <sys/ioctl.h>
 #include <sys/time.h>
 
+#ifdef X11_IN_TTY
+#include <X11/Xlib.h>
+#include <X11/Xutil.h>
+#include <X11/keysym.h>
+#include <X11/Xatom.h>
+#endif
+
 #include "qe.h"
 
 #if MAX_UNICODE_DISPLAY > 0xFFFF
@@ -147,6 +154,16 @@ typedef struct TTYState {
     int tty_fg_colors_count;
     int tty_bg_colors_count;
     unsigned int comb_cache[COMB_CACHE_SIZE];
+
+#ifdef X11_IN_TTY
+    Display* display;
+    Window window;
+    Atom xa_clipboard;
+    Atom xa_targets;
+    Atom xa_utf8_string;
+    Atom xa_utf8_string2;
+    Atom xa_utf8_string3;
+#endif
 } TTYState;
 
 static QEditScreen *tty_screen;   /* for tty_term_exit and tty_term_resize */
@@ -156,7 +173,9 @@ static void tty_dpy_invalidate(QEditScreen *s);
 static void tty_term_resize(int sig);
 static void tty_term_exit(void);
 static void tty_read_handler(void *opaque);
-
+#ifdef X11_IN_TTY
+static void x11_in_tty_read_handler(void *opaque);
+#endif
 static int tty_dpy_probe(void)
 {
     return 1;
@@ -363,6 +382,21 @@ static int tty_dpy_init(QEditScreen *s,
         do_toggle_control_h(NULL, 1);
     }
 
+#ifdef X11_IN_TTY
+    ts->display = XOpenDisplay(NULL);
+    if(ts->display != NULL) {
+        //ts->window = DefaultRootWindow(ts->display);
+        ts->window = XCreateSimpleWindow(ts->display, DefaultRootWindow(ts->display),
+                                         0, 0, 1, 1, 4, 0, 0);
+        ts->xa_targets      = XInternAtom(ts->display, "TARGETS", False);
+        ts->xa_utf8_string  = XInternAtom(ts->display, "UTF8_STRING", False);
+        ts->xa_utf8_string2 = XInternAtom(ts->display, "text/plain;charset=UTF-8", False);
+        ts->xa_utf8_string3 = XInternAtom(ts->display, "text/plain;charset=utf-8", False);
+        int fd = ConnectionNumber(ts->display);
+        set_read_handler(fd, x11_in_tty_read_handler, s);
+    }
+#endif   
+    
     return 0;
 }
 
@@ -724,6 +758,84 @@ static void tty_read_handler(void *opaque)
     }
 }
 
+#ifdef X11_IN_TTY
+static void x11_in_tty_read_handler(void* opaque) {
+    QEditScreen *s = opaque;
+    QEmacsState *qs = &qe_state;
+    TTYState *ts = s->priv_data;
+    QEEvent ev1, *ev = &ev1;
+    while (XPending(ts->display)) {
+        XEvent xev;
+        XNextEvent(ts->display, &xev);
+        if(xev.type == SelectionRequest) {
+            XEvent reply;
+            XSelectionRequestEvent *rq = &xev.xselectionrequest;
+            
+            reply.xselection.type      = SelectionNotify;
+            reply.xselection.property  = None;
+            reply.xselection.display   = rq->display;
+            reply.xselection.requestor = rq->requestor;
+            reply.xselection.selection = rq->selection;
+            reply.xselection.target    = rq->target;
+            reply.xselection.time      = rq->time;
+            
+            if (rq->target == ts->xa_targets) {
+                Atom target_list[5];
+                target_list[0] = ts->xa_targets;
+                target_list[1] = ts->xa_utf8_string;
+                target_list[2] = ts->xa_utf8_string2;
+                target_list[3] = ts->xa_utf8_string3;
+                target_list[4] = XA_STRING;
+                
+                XChangeProperty(ts->display, rq->requestor, rq->property,
+                                ts->xa_targets, 8*sizeof(target_list[0]), PropModeReplace,
+                                (unsigned char*)&target_list, countof(target_list));
+            } else if(rq->target == XA_STRING) {
+                /* XXX: charset is ignored! */
+                
+                /* get qemacs yank buffer */
+                EditBuffer* b = qs->yank_buffers[qs->yank_current];
+                if (!b) return;
+                unsigned char* buf = qe_malloc_array(unsigned char, b->total_size);
+                if (!buf) return;
+                eb_read(b, 0, buf, b->total_size);
+                
+                XChangeProperty(ts->display, rq->requestor, rq->property,
+                                XA_STRING, 8, PropModeReplace,
+                                buf, b->total_size);
+                qe_free(&buf);
+            } else if (rq->target == ts->xa_utf8_string  ||
+                       rq->target == ts->xa_utf8_string2 ||
+                       rq->target == ts->xa_utf8_string3) {
+                int len, size;
+                
+                /* get qemacs yank buffer */
+                EditBuffer* b = qs->yank_buffers[qs->yank_current];
+                if (!b) return;
+                
+                /* Get buffer contents encoded in utf-8-unix */
+                size = eb_get_content_size(b) + 1;
+                unsigned char* buf = qe_malloc_array(unsigned char, size);
+                if (!buf) return;
+                len = eb_get_contents(b, (char *)buf, size);
+                
+                XChangeProperty(ts->display, rq->requestor, rq->property,
+                                rq->target, 8, PropModeReplace,
+                                buf, len);
+                qe_free(&buf);
+            } 
+            reply.xselection.property = rq->property;
+            XSendEvent(ts->display, rq->requestor, True, 0, &reply);
+            XFlush(ts->display);
+        } else if(xev.type == SelectionRequest) {
+            /* ask qemacs to stop visual notification of selection */
+            ev->type = QE_SELECTION_CLEAR_EVENT;
+            qe_handle_event(ev);
+        }
+    }
+}
+#endif
+        
 static void tty_dpy_fill_rectangle(QEditScreen *s,
                                    int x1, int y1, int w, int h, QEColor color)
 {
@@ -1028,8 +1140,84 @@ static void tty_dpy_set_clip(qe__unused__ QEditScreen *s,
 {
 }
 
-static void tty_dpy_flush(QEditScreen *s)
+#ifdef X11_IN_TTY
+static void tty_dpy_selection_activate(QEditScreen *s)
 {
+    TTYState *ts = s->priv_data;
+
+    /* own selection from now */
+    if(ts->display != NULL) {
+        XSetSelectionOwner(ts->display, XA_PRIMARY, ts->window, CurrentTime);
+    }
+}
+
+static Bool test_event_(qe__unused__ Display *dpy, XEvent *ev,
+                       qe__unused__ char *arg)
+{
+    return (ev->type == SelectionNotify);
+}
+
+
+static void tty_dpy_selection_request(QEditScreen *s)
+{
+    TTYState *ts = s->priv_data;
+    QEmacsState *qs = &qe_state;
+    Window w;
+    Atom prop;
+    Atom utf8;
+    long nread;
+    unsigned char *data;
+    Atom actual_type;
+    int actual_fmt;
+    unsigned long nitems, bytes_after;
+    EditBuffer *b;
+    XEvent xev;
+
+    if(ts->display != NULL) {
+        w = XGetSelectionOwner(ts->display, XA_PRIMARY);
+        if (w == None || w == ts->window)
+            return; /* qemacs can use its own selection */
+
+        /* use X11 selection (Will be pasted when receiving
+           SelectionNotify event) */
+        prop = XInternAtom(ts->display, "VT_SELECTION", False);
+        utf8 = XInternAtom(ts->display, "UTF8_STRING", False);
+        XConvertSelection(ts->display, XA_PRIMARY, utf8,
+                          prop, ts->window, CurrentTime);
+        
+        /* XXX: add timeout too if the target application is not well
+           educated */
+        XIfEvent(ts->display, &xev, test_event_, NULL);
+        w = xev.xselection.requestor;
+        prop = xev.xselection.property;
+        
+        /* copy GUI selection to a new yank buffer */
+        b = new_yank_buffer(qs, NULL);
+        eb_set_charset(b, &charset_utf8, EOL_UNIX);
+        nread = 0;
+
+        for (;;) {
+            if ((XGetWindowProperty(ts->display, w, prop, nread/4, 4096, True,
+                                    AnyPropertyType, &actual_type, &actual_fmt,
+                                    &nitems, &bytes_after, &data) != Success) || (actual_type != utf8)) {
+                XFree(data);
+                break;
+            }
+            
+            eb_write(b, nread, data, nitems);
+            
+            nread += nitems;
+            XFree(data);
+            
+            if (bytes_after == 0)
+                break;
+        }
+    }
+}
+#endif
+
+
+static void tty_dpy_flush(QEditScreen *s) {
     TTYState *ts = s->priv_data;
     TTYChar *ptr, *ptr1, *ptr2, *ptr3, *ptr4, cc, blankcc;
     int y, shadow, ch, bgcolor, fgcolor, shifted, attr;
@@ -1531,8 +1719,13 @@ static QEDisplay tty_dpy = {
     tty_dpy_text_metrics,
     tty_dpy_draw_text,
     tty_dpy_set_clip,
+#ifdef X11_IN_TTY
+    tty_dpy_selection_activate,
+    tty_dpy_selection_request,
+#else
     NULL, /* dpy_selection_activate */
     NULL, /* dpy_selection_request */
+#endif
     tty_dpy_invalidate,
     tty_dpy_cursor_at,
     tty_dpy_bmp_alloc,

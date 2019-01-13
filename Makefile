@@ -172,6 +172,11 @@ ifdef CONFIG_X11
   endif
 endif
 
+ifdef CONFIG_X11_IN_TTY
+  CFLAGS+= -DX11_IN_TTY
+  LDFLAGS+= -lX11
+endif
+
 ifndef CONFIG_TINY
   TARGETS += tqe$(EXE)
 endif
