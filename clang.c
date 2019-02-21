@@ -1233,9 +1233,6 @@ static void do_c_list_conditionals(EditState *s)
 
 /* C mode specific commands */
 static CmdDef c_commands[] = {
-    CMD2( KEY_CTRL('i'), KEY_NONE,
-          "c-indent-command", do_c_indent, ES, "*")
-            /* should map to KEY_META + KEY_CTRL_LEFT ? */
     CMD3( KEY_META('['), KEY_NONE,
           "c-backward-conditional", do_c_forward_conditional, ESi, -1, "*v")
     CMD3( KEY_META(']'), KEY_NONE,
@@ -1246,8 +1243,6 @@ static CmdDef c_commands[] = {
           "c-electric-key", do_c_electric_key, ESi, "*ki")
     CMD2( KEY_RET, KEY_NONE,
           "c-newline", do_c_return, ES, "*v")
-	CMD2( KEY_TAB, KEY_NONE,
-          "c-electric", do_c_electric, ES, "*v")
     CMD_DEF_END,
 };
 

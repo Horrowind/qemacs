@@ -1753,7 +1753,7 @@ static CmdDef extra_commands[] = {
           "untabify-region", do_untabify_region, ES, "*")
     CMD2( KEY_NONE, KEY_NONE,
           "untabify-buffer", do_untabify_buffer, ES, "*")
-    CMD2( KEY_META(KEY_CTRL('\\')), KEY_NONE,
+    CMD2( KEY_CTRL('i'), KEY_NONE,
           "indent-region", do_indent_region, ES, "*")
 
     CMD2( KEY_CTRLX('t'), KEY_NONE,
