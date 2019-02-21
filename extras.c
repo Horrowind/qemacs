@@ -459,10 +459,11 @@ static void do_untabify_region(EditState *s)
 static void do_indent_region(EditState *s)
 {
     int col_num, line1, line2;
-    if(s->region_style != QE_STYLE_REGION_HIGHLIGHT) return;
 
-    /* deactivate region highlight */
-    s->region_style = 0;
+    if(s->region_style != QE_STYLE_REGION_HIGHLIGHT) {
+        (s->mode->indent_func)(s, s->offset);
+        return;
+    }
 
     /* Swap point and mark so mark <= point */
     if (s->offset < s->b->mark) {
@@ -474,6 +475,11 @@ static void do_indent_region(EditState *s)
     eb_get_pos(s->b, &line1, &col_num, s->b->mark);
     eb_get_pos(s->b, &line2, &col_num, s->offset);
 
+    
+    /* deactivate region highlight */
+    s->region_style = 0;
+
+    
     if (col_num == 0)
         line2--;
 
