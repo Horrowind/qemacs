@@ -393,6 +393,7 @@ static void do_tabify_buffer(EditState *s)
 static void do_tabify_region(EditState *s)
 {
     /* deactivate region highlight */
+    if(s->region_style != QE_STYLE_REGION_HIGHLIGHT) return;
     s->region_style = 0;
 
     eb_tabify(s->b, s->b->mark, s->offset);
@@ -448,6 +449,7 @@ static void do_untabify_buffer(EditState *s)
 
 static void do_untabify_region(EditState *s)
 {
+    if(s->region_style != QE_STYLE_REGION_HIGHLIGHT) return;
     /* deactivate region highlight */
     s->region_style = 0;
 
@@ -457,6 +459,7 @@ static void do_untabify_region(EditState *s)
 static void do_indent_region(EditState *s)
 {
     int col_num, line1, line2;
+    if(s->region_style != QE_STYLE_REGION_HIGHLIGHT) return;
 
     /* deactivate region highlight */
     s->region_style = 0;
