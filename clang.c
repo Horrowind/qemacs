@@ -1086,6 +1086,45 @@ static void do_c_electric_key(EditState *s, int key)
         (s->mode->indent_func)(s, offset);
 }
 
+static void do_c_indent_region(EditState *s)
+{
+    int col_num, line1, line2;
+
+    if(s->region_style != QE_STYLE_REGION_HIGHLIGHT) {
+        do_c_electric(s);
+        return;
+    }
+
+    /* Swap point and mark so mark <= point */
+    if (s->offset < s->b->mark) {
+        int tmp = s->b->mark;
+        s->b->mark = s->offset;
+        s->offset = tmp;
+    }
+    /* We do it with lines to avoid offset variations during indenting */
+    eb_get_pos(s->b, &line1, &col_num, s->b->mark);
+    eb_get_pos(s->b, &line2, &col_num, s->offset);
+
+    
+    /* deactivate region highlight */
+    s->region_style = 0;
+
+    
+    if (col_num == 0)
+        line2--;
+
+    /* Iterate over all lines inside block */
+    for (; line1 <= line2; line1++) {
+        if (s->mode->indent_func) {
+            (s->mode->indent_func)(s, eb_goto_pos(s->b, line1, 0));
+        } else {
+            s->offset = eb_goto_pos(s->b, line1, 0);
+            do_tab(s, 1);
+        }
+    }
+}
+
+
 static void do_c_return(EditState *s)
 {
     int offset = s->offset;
@@ -1241,6 +1280,8 @@ static CmdDef c_commands[] = {
           "c-list-conditionals", do_c_list_conditionals, ES, "")
     CMD2( '{', '}',
           "c-electric-key", do_c_electric_key, ESi, "*ki")
+    CMD2( KEY_CTRL('i'), KEY_NONE,
+         "indent-region", do_c_indent_region, ES, "*")
     CMD2( KEY_RET, KEY_NONE,
           "c-newline", do_c_return, ES, "*v")
     CMD_DEF_END,
